@@ -1,65 +1,111 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useState } from "react";
+import LoginModal from "./components/LoginModal";
+
+const Page = () => {
+  const [showModal, setShowModal] = useState(false);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-900 to-indigo-950 flex items-center justify-center px-10">
+      <div className="max-w-7xl w-full grid md:grid-cols-2 gap-10 items-center">
+       
+
+        <div>
+          <div className="inline-block bg-blue-600/20 text-blue-300 px-4 py-2 rounded-full mb-6">
+            Logistics Management Platform
+          </div>
+
+          <h1 className="text-6xl font-extrabold text-white leading-tight">
+            Logistics Delivery
+            <span className="block text-blue-400">Tracking System</span>
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+
+          <p className="text-gray-300 mt-6 text-lg leading-relaxed max-w-xl">
+            Manage package deliveries, monitor shipment status, and allow
+            customers to track their deliveries using unique tracking numbers.
           </p>
+
+          <div className="flex gap-4 mt-10">
+            <button
+              onClick={() => setShowModal(true)}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-10 py-4 rounded-xl font-semibold shadow-lg transition-all duration-300"
+            >
+              Login
+            </button>
+
+           
+          </div>
+
+          <div className="mt-12 flex gap-10">
+            <div>
+              <h2 className="text-3xl font-bold text-white">100+</h2>
+              <p className="text-gray-400">Deliveries Managed</p>
+            </div>
+
+            <div>
+              <h2 className="text-3xl font-bold text-white">24/7</h2>
+              <p className="text-gray-400">Tracking Access</p>
+            </div>
+
+            <div>
+              <h2 className="text-3xl font-bold text-white">Secure</h2>
+              <p className="text-gray-400">Authentication</p>
+            </div>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        
+
+        <div className="hidden md:flex justify-center">
+          <div className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-3xl p-8 w-[450px] shadow-2xl">
+            <h2 className="text-3xl font-bold text-white mb-8">
+              System Features
+            </h2>
+
+            <div className="space-y-6">
+              <div className="bg-white/10 p-4 rounded-xl">
+                <h3 className="text-white font-semibold">Dashboard</h3>
+
+                <p className="text-gray-300 text-sm">
+                  Monitor total deliveries, pending shipments, and delivered
+                  packages.
+                </p>
+              </div>
+
+              <div className="bg-white/10 p-4 rounded-xl">
+                <h3 className="text-white font-semibold">
+                  Delivery Management
+                </h3>
+
+                <p className="text-gray-300 text-sm">
+                  Add, edit, view and delete delivery records.
+                </p>
+              </div>
+
+              <div className="bg-white/10 p-4 rounded-xl">
+                <h3 className="text-white font-semibold">Tracking System</h3>
+
+                <p className="text-gray-300 text-sm">
+                  Customers can track packages using tracking numbers.
+                </p>
+              </div>
+
+              <div className="bg-white/10 p-4 rounded-xl">
+                <h3 className="text-white font-semibold">Reports</h3>
+
+                <p className="text-gray-300 text-sm">
+                  Generate logistics summaries and delivery statistics.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
-      </main>
+      </div>
+
+      <LoginModal isVisible={showModal} onClose={() => setShowModal(false)} />
     </div>
   );
-}
+};
+
+export default Page;
