@@ -7,10 +7,23 @@ import Wrapper from "../components/Wrapper";
 
 interface Delivery {
   tracking_number: string;
-  customer_name: string;
-  customer_phone: string;
+
+  sender_name: string;
+  sender_phone: string;
+
+  receiver_name: string;
+  receiver_phone: string;
+
+  package_weight: string;
+  package_description: string;
+
   origin: string;
   destination: string;
+
+  bus_number: string;
+  departure_time: string;
+  expected_arrival: string;
+  
   status: string;
 }
 
@@ -39,48 +52,93 @@ export default function TrackingPage() {
       <div className="min-h-screen bg-gray-100">
         <Sidebar />
 
-       
         <main className="ml-64 p-8">
-          <h1 className="text-4xl font-bold mb-8 text-slate-800">
-            Track Delivery
-          </h1>
+          <h1 className="text-4xl font-bold mb-8">Track Package</h1>
 
-         
-          <div className="bg-white p-8 rounded-2xl shadow-lg max-w-3xl">
+          {/* Search Box */}
+
+          <div className="bg-white p-6 rounded-xl shadow-lg mb-8">
             <input
               type="text"
               placeholder="Enter Tracking Number"
               value={trackingNumber}
               onChange={(e) => setTrackingNumber(e.target.value)}
-              className="w-full border p-4 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border p-4 rounded-lg mb-4"
             />
 
             <button
               onClick={handleSearch}
-              className="bg-blue-700 hover:bg-blue-800 text-white px-6 py-3 rounded-lg transition"
+              className="bg-blue-700 hover:bg-blue-800 text-white px-6 py-3 rounded-lg"
             >
               Search
             </button>
           </div>
 
-        
-          {delivery && (
-            <div className="bg-white p-8 rounded-2xl shadow-lg mt-8 max-w-3xl">
-              <h2 className="text-2xl font-bold mb-6 text-slate-800">
-                Delivery Information
-              </h2>
+          {/* Results */}
 
-              <div className="space-y-4">
+          {delivery && (
+            <div className="space-y-6">
+              {/* Sender Information */}
+
+              <div className="bg-white p-6 rounded-xl shadow-lg">
+                <h2 className="text-xl font-bold text-blue-700 mb-4">
+                  Sender Information
+                </h2>
+
+                <p>
+                  <strong>Name:</strong> {delivery.sender_name}
+                </p>
+
+                <p>
+                  <strong>Phone:</strong> {delivery.sender_phone}
+                </p>
+              </div>
+
+              {/* Receiver Information */}
+
+              <div className="bg-white p-6 rounded-xl shadow-lg">
+                <h2 className="text-xl font-bold text-green-700 mb-4">
+                  Receiver Information
+                </h2>
+
+                <p>
+                  <strong>Name:</strong> {delivery.receiver_name}
+                </p>
+
+                <p>
+                  <strong>Phone:</strong> {delivery.receiver_phone}
+                </p>
+              </div>
+
+              {/* Package Information */}
+
+              <div className="bg-white p-6 rounded-xl shadow-lg">
+                <h2 className="text-xl font-bold text-purple-700 mb-4">
+                  Package Information
+                </h2>
+
+                <p>
+                  <strong>Package Weight:</strong> {delivery.package_weight}
+                </p>
+
+                <p>
+                  <strong>Description:</strong>
+                </p>
+
+                <p className="text-gray-700 mt-2">
+                  {delivery.package_description}
+                </p>
+              </div>
+
+              {/* Delivery Information */}
+
+              <div className="bg-white p-6 rounded-xl shadow-lg">
+                <h2 className="text-xl font-bold text-orange-700 mb-4">
+                  Delivery Information
+                </h2>
+
                 <p>
                   <strong>Tracking Number:</strong> {delivery.tracking_number}
-                </p>
-
-                <p>
-                  <strong>Customer Name:</strong> {delivery.customer_name}
-                </p>
-
-                <p>
-                  <strong>Customer Phone:</strong> {delivery.customer_phone}
                 </p>
 
                 <p>
@@ -92,14 +150,32 @@ export default function TrackingPage() {
                 </p>
 
                 <p>
+                  <strong>Bus Number:</strong> {delivery.bus_number}
+                </p>
+
+                <p>
+                  <strong>Departure Time:</strong>{" "}
+                  {delivery.departure_time
+                    ? new Date(delivery.departure_time).toLocaleString()
+                    : "-"}
+                </p>
+
+                <p>
+                  <strong>Expected Arrival:</strong>{" "}
+                  {delivery.expected_arrival
+                    ? new Date(delivery.expected_arrival).toLocaleString()
+                    : "-"}
+                </p>
+
+                <p>
                   <strong>Status:</strong>{" "}
                   <span
-                    className={`px-3 py-1 rounded-full text-white text-sm ${
+                    className={`font-bold ${
                       delivery.status === "Delivered"
-                        ? "bg-green-600"
+                        ? "text-green-600"
                         : delivery.status === "In Transit"
-                          ? "bg-yellow-500"
-                          : "bg-red-500"
+                          ? "text-yellow-500"
+                          : "text-red-500"
                     }`}
                   >
                     {delivery.status}

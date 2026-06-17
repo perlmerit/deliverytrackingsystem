@@ -11,10 +11,25 @@ import Wrapper from "../components/Wrapper";
 interface Delivery {
   id?: string;
   tracking_number: string;
-  customer_name: string;
-  customer_phone: string;
+
+  sender_name: string;
+  sender_phone: string;
+
+  receiver_name: string;
+  receiver_phone: string;
+
+  package_weight: string;
+  package_description: string;
+
   origin: string;
   destination: string;
+
+  bus_number: "";
+  departure_time: "";
+  expected_arrival: "";
+
+  tracking_stage: string;
+
   status: string;
 }
 
@@ -64,7 +79,6 @@ const Delivery = () => {
         <div className="min-h-screen bg-gray-100">
           <Sidebar />
 
-         
           <main className="ml-64 p-8">
             <div className="flex justify-between items-center mb-8">
               <h1 className="text-3xl font-bold">Deliveries</h1>
@@ -76,21 +90,34 @@ const Delivery = () => {
               </Link>
             </div>
 
-            
             <div className="bg-white rounded-xl shadow-lg overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="w-full">
+                <table className="min-w-[1800px]">
                   <thead className="bg-blue-700 text-white">
                     <tr>
                       <th className="p-4 text-left">Tracking No</th>
 
-                      <th className="p-4 text-left">Customer</th>
+                      <th className="p-4 text-left">Sender</th>
 
-                      <th className="p-4 text-left">Phone</th>
+                      <th className="p-4 text-left">Sender Phone</th>
+
+                      <th className="p-4 text-left">Receiver</th>
+
+                      <th className="p-4 text-left">Receiver Phone</th>
+
+                      <th className="p-4 text-left">Weight</th>
 
                       <th className="p-4 text-left">Origin</th>
 
                       <th className="p-4 text-left">Destination</th>
+
+                      <th className="p-4 text-left">Bus Number</th>
+
+                      <th className="p-4 text-left">Departure Time</th>
+
+                      <th className="p-4 text-left">Expecetd Arrival</th>
+
+                      <th className="p-4 text-left">Tracking Stage</th>
 
                       <th className="p-4 text-left">Status</th>
 
@@ -104,17 +131,57 @@ const Delivery = () => {
                         key={delivery.id}
                         className="border-b hover:bg-gray-50"
                       >
-                        <td className="p-4">{delivery.tracking_number}</td>
+                        <td className="min-w-[180px]">
+                          {delivery.tracking_number}
+                        </td>
 
-                        <td className="p-4">{delivery.customer_name}</td>
+                        <td className="p-4 min-w-[180px]">
+                          {delivery.sender_name}
+                        </td>
 
-                        <td className="p-4">{delivery.customer_phone}</td>
+                        <td className="p-4 min-w-[180px]">
+                          {delivery.sender_phone}
+                        </td>
 
-                        <td className="p-4">{delivery.origin}</td>
+                        <td className="p-4 min-w-[180px]">
+                          {delivery.receiver_name}
+                        </td>
 
-                        <td className="p-4">{delivery.destination}</td>
+                        <td className="p-4 min-w-[180px]">
+                          {delivery.receiver_phone}
+                        </td>
 
-                        <td className="p-4">
+                        <td className="p-4 min-w-[180px]">
+                          {delivery.package_weight}
+                        </td>
+
+                        <td className="p-4 min-w-[180px]">{delivery.origin}</td>
+
+                        <td className="p-4 min-w-[180px]">
+                          {delivery.destination}
+                        </td>
+
+                        <td className="p-4 min-w-[180px]">
+                          {delivery.bus_number}
+                        </td>
+
+                        <td className="p-4 min-w-[180px]">
+                          {delivery.departure_time
+                            ? new Date(delivery.departure_time).toLocaleString()
+                            : "-"}
+                        </td>
+
+                        <td className="p-4 min-w-[180px]">
+                          {delivery.expected_arrival
+                            ? new Date(
+                                delivery.expected_arrival,
+                              ).toLocaleString()
+                            : "-"}
+                        </td>
+
+                        <td className="p-4 min-w-[180px]">{delivery.tracking_stage}</td>
+
+                        <td className="p-4 min-w-[180px]">
                           <span
                             className={`px-3 py-1 rounded-full text-white text-sm ${
                               delivery.status === "Delivered"
@@ -128,7 +195,7 @@ const Delivery = () => {
                           </span>
                         </td>
 
-                        <td className="p-4">
+                        <td className="p-4 min-w-[180px]">
                           <div className="flex justify-center gap-2">
                             <Link href={`/deliveries/edit/${delivery.id}`}>
                               <button className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded">
@@ -152,7 +219,7 @@ const Delivery = () => {
                     {deliveries.length === 0 && (
                       <tr>
                         <td
-                          colSpan={7}
+                          colSpan={10}
                           className="text-center p-8 text-gray-500"
                         >
                           No deliveries found

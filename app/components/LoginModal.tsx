@@ -51,7 +51,7 @@ const LoginModal = ({ isVisible, onClose }: LoginModalProps) => {
         className="relative w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Top Banner */}
+   
         <div className="bg-gradient-to-r from-blue-700 to-indigo-800 p-8 text-center">
           <h1 className="text-3xl font-bold text-white">
             Welcome Back
@@ -62,7 +62,7 @@ const LoginModal = ({ isVisible, onClose }: LoginModalProps) => {
           </p>
         </div>
 
-        {/* Close Button */}
+    
         <button
           onClick={onClose}
           className="absolute right-4 top-4 text-white text-xl font-bold hover:scale-110 transition"
@@ -70,7 +70,7 @@ const LoginModal = ({ isVisible, onClose }: LoginModalProps) => {
           ✕
         </button>
 
-        {/* Form */}
+    
         <div className="p-8">
           <form
             onSubmit={handleLogin}
