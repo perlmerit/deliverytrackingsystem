@@ -12,21 +12,37 @@ interface Delivery {
   id?: string;
   tracking_number: string;
 
-  sender_name: string;
+  sender_firstname: string;
+  sender_lastname: string;
   sender_phone: string;
+  sender_company: string;
+  sender_email: string;
+  sender_address: string;
+  sender_region: string;
+  sender_country: string;
 
-  receiver_name: string;
+  receiver_firstname: string;
+  receiver_lastname: string;
+  receiver_company: string;
   receiver_phone: string;
+  receiver_email: string;
+  receiver_address: string;
+  receiver_region: string;
+  receiver_country: string;
 
   package_weight: string;
   package_description: string;
+  package_length: string;
+  package_width: string;
+  package_height: string;
+  package_value: string;
 
   origin: string;
   destination: string;
 
-  bus_number: "";
-  departure_time: "";
-  expected_arrival: "";
+  bus_number: string;
+  departure_time: string;
+  expected_arrival: string;
 
   tracking_stage: string;
 
@@ -92,20 +108,54 @@ const Delivery = () => {
 
             <div className="bg-white rounded-xl shadow-lg overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="min-w-[1800px]">
+                <table className="min-w-max w-full text-sm">
                   <thead className="bg-blue-700 text-white">
                     <tr>
                       <th className="p-4 text-left">Tracking No</th>
 
-                      <th className="p-4 text-left">Sender</th>
+                      <th className="p-4 text-left">Sender First Name</th>
+
+                      <th className="p-4 text-left">SenderLast Name</th>
+
+                      <th className="p-4 text-left">Sender Company</th>
 
                       <th className="p-4 text-left">Sender Phone</th>
 
-                      <th className="p-4 text-left">Receiver</th>
+                      <th className="p-4 text-left">Sender Email</th>
+
+                      <th className="p-4 text-left">Sender Address</th>
+
+                      <th className="p-4 text-left">Sender Region</th>
+
+                      <th className="p-4 text-left">Sender Country</th>
+
+                      <th className="p-4 text-left">Receiver First Name</th>
+
+                      <th className="p-4 text-left">Receiver Last Name</th>
+
+                      <th className="p-4 text-left">Receiver Company</th>
 
                       <th className="p-4 text-left">Receiver Phone</th>
 
-                      <th className="p-4 text-left">Weight</th>
+                      <th className="p-4 text-left">Receiver Email</th>
+
+                      <th className="p-4 text-left">Receiver Address</th>
+
+                      <th className="p-4 text-left">Receiver Region</th>
+
+                      <th className="p-4 text-left">Receiver Country</th>
+
+                      <th className="p-4 text-left">Package Length</th>
+
+                      <th className="p-4 text-left">Package Width</th>
+
+                      <th className="p-4 text-left">Package Height</th>
+
+                      <th className="p-4 text-left">Package Value</th>
+
+                      <th className="p-4 text-left">Package Weight</th>
+
+                      <th className="p-4 text-left">Package Description</th>
 
                       <th className="p-4 text-left">Origin</th>
 
@@ -124,54 +174,106 @@ const Delivery = () => {
                       <th className="p-4 text-center">Action</th>
                     </tr>
                   </thead>
-
                   <tbody>
                     {deliveries.map((delivery) => (
                       <tr
                         key={delivery.id}
                         className="border-b hover:bg-gray-50"
                       >
-                        <td className="min-w-[180px]">
+                        <td className="p-4  whitespace-nowrap">
                           {delivery.tracking_number}
                         </td>
 
-                        <td className="p-4 min-w-[180px]">
-                          {delivery.sender_name}
+                        {/* Sender */}
+                        <td className="p-4  whitespace-nowrap">
+                          {delivery.sender_firstname}
                         </td>
-
-                        <td className="p-4 min-w-[180px]">
+                        <td className="p-4  whitespace-nowrap">
+                          {delivery.sender_lastname}
+                        </td>
+                        <td className="p-4  whitespace-nowrap">
                           {delivery.sender_phone}
                         </td>
-
-                        <td className="p-4 min-w-[180px]">
-                          {delivery.receiver_name}
+                        <td className="p-4  whitespace-nowrap">
+                          {delivery.sender_company}
+                        </td>
+                        <td className="p-4  whitespace-nowrap">
+                          {delivery.sender_email}
+                        </td>
+                        <td className="p-4  whitespace-nowrap">
+                          {delivery.sender_address}
+                        </td>
+                        <td className="p-4  whitespace-nowrap">
+                          {delivery.sender_region}
+                        </td>
+                        <td className=" p-4 whitespace-nowrap">
+                          {delivery.sender_country}
                         </td>
 
-                        <td className="p-4 min-w-[180px]">
+                        {/* Receiver */}
+                        <td className="p-4  whitespace-nowrap">
+                          {delivery.receiver_firstname}
+                        </td>
+                        <td className="p-4  whitespace-nowrap">
+                          {delivery.receiver_lastname}
+                        </td>
+                        <td className="p-4  whitespace-nowrap">
                           {delivery.receiver_phone}
                         </td>
+                        <td className="p-4  whitespace-nowrap">
+                          {delivery.receiver_company}
+                        </td>
+                        <td className="p-4  whitespace-nowrap">
+                          {delivery.receiver_email}
+                        </td>
+                        <td className="p-4  whitespace-nowrap">
+                          {delivery.receiver_address}
+                        </td>
+                        <td className="p-4  whitespace-nowrap">
+                          {delivery.receiver_region}
+                        </td>
+                        <td className="p-4  whitespace-nowrap">
+                          {delivery.receiver_country}
+                        </td>
 
-                        <td className="p-4 min-w-[180px]">
+                        {/* Package */}
+                        <td className="p-4  whitespace-nowrap">
                           {delivery.package_weight}
                         </td>
-
-                        <td className="p-4 min-w-[180px]">{delivery.origin}</td>
-
-                        <td className="p-4 min-w-[180px]">
-                          {delivery.destination}
+                        <td className="p-4  whitespace-nowrap">
+                          {delivery.package_description}
+                        </td>
+                        <td className="p-4  whitespace-nowrap">
+                          {delivery.package_length}
+                        </td>
+                        <td className="p-4  whitespace-nowrap">
+                          {delivery.package_width}
+                        </td>
+                        <td className="p-4  whitespace-nowrap">
+                          {delivery.package_height}
+                        </td>
+                        <td className="p-4  whitespace-nowrap">
+                          {delivery.package_value}
                         </td>
 
-                        <td className="p-4 min-w-[180px]">
+                        {/* Delivery */}
+                        <td className="p-4  whitespace-nowrap">
+                          {delivery.origin}
+                        </td>
+                        <td className="p-4  whitespace-nowrap">
+                          {delivery.destination}
+                        </td>
+                        <td className="p-4  whitespace-nowrap">
                           {delivery.bus_number}
                         </td>
 
-                        <td className="p-4 min-w-[180px]">
+                        <td className="p-4  whitespace-nowrap">
                           {delivery.departure_time
                             ? new Date(delivery.departure_time).toLocaleString()
                             : "-"}
                         </td>
 
-                        <td className="p-4 min-w-[180px]">
+                        <td className="p-4  whitespace-nowrap">
                           {delivery.expected_arrival
                             ? new Date(
                                 delivery.expected_arrival,
@@ -179,9 +281,11 @@ const Delivery = () => {
                             : "-"}
                         </td>
 
-                        <td className="p-4 min-w-[180px]">{delivery.tracking_stage}</td>
+                        <td className="p-4  whitespace-nowrap">
+                          {delivery.tracking_stage}
+                        </td>
 
-                        <td className="p-4 min-w-[180px]">
+                        <td className="p-4  whitespace-nowrap">
                           <span
                             className={`px-3 py-1 rounded-full text-white text-sm ${
                               delivery.status === "Delivered"
@@ -195,7 +299,7 @@ const Delivery = () => {
                           </span>
                         </td>
 
-                        <td className="p-4 min-w-[180px]">
+                        <td className="p-4  whitespace-nowrap">
                           <div className="flex justify-center gap-2">
                             <Link href={`/deliveries/edit/${delivery.id}`}>
                               <button className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded">
@@ -219,7 +323,7 @@ const Delivery = () => {
                     {deliveries.length === 0 && (
                       <tr>
                         <td
-                          colSpan={10}
+                          colSpan={30}
                           className="text-center p-8 text-gray-500"
                         >
                           No deliveries found

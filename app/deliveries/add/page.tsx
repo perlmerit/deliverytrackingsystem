@@ -10,14 +10,30 @@ import toast, { Toaster } from "react-hot-toast";
 interface Delivery {
   tracking_number: string;
 
-  sender_name: string;
+  sender_firstname: string;
+  sender_lastname: string;
   sender_phone: string;
+  sender_company: string;
+  sender_email: string;
+  sender_address: string;
+  sender_region: string;
+  sender_country: string;
 
-  receiver_name: string;
+  receiver_firstname: string;
+  receiver_lastname: string;
+  receiver_company: string;
   receiver_phone: string;
+  receiver_email: string;
+  receiver_address: string;
+  receiver_region: string;
+  receiver_country: string;
 
   package_weight: string;
   package_description: string;
+  package_length: string;
+  package_width: string;
+  package_height: string;
+  package_value: string;
 
   origin: string;
   destination: string;
@@ -31,27 +47,51 @@ interface Delivery {
   status: string;
 }
 
-const doualaCities = [
-  "Akwa",
-  "Bonaberi",
-  "Bonamoussadi",
-  "Makepe",
-  "Deido",
-  "Bepanda",
-  "Logbessou",
-  "Kotto",
-  "PK8",
-  "PK10",
-  "PK11",
-  "Yassa",
-  "Ndogbong",
-  "Ndogpassi",
-  "New Bell",
-  "Bonapriso",
-  "Bali",
-  "Cité SIC",
-  "Village",
-  "Japoma",
+const countries = [
+  "Cameroon",
+  "Nigeria",
+  "Ghana",
+  "Togo",
+  "Benin",
+  "Ivory Coast",
+  "Senegal",
+  "Mali",
+  "Burkina Faso",
+  "Niger",
+  "Chad",
+  "Central African Republic",
+  "Republic of the Congo",
+  "Democratic Republic of the Congo",
+  "Gabon",
+  "Equatorial Guinea",
+  "South Africa",
+  "Kenya",
+  "Uganda",
+  "Tanzania",
+  "Rwanda",
+  "Ethiopia",
+  "Morocco",
+  "Algeria",
+  "Tunisia",
+  "Egypt",
+  "France",
+  "Germany",
+  "Belgium",
+  "Netherlands",
+  "Spain",
+  "Italy",
+  "United Kingdom",
+  "United States",
+  "Canada",
+  "Brazil",
+  "Turkey",
+  "United Arab Emirates",
+  "Saudi Arabia",
+  "China",
+  "India",
+  "Japan",
+  "South Korea",
+  "Australia",
 ];
 
 export default function AddDelivery() {
@@ -61,14 +101,30 @@ export default function AddDelivery() {
   const [form, setForm] = useState<Delivery>({
     tracking_number: "",
 
-    sender_name: "",
+    sender_firstname: "",
+    sender_lastname: "",
     sender_phone: "",
+    sender_company: "",
+    sender_email: "",
+    sender_address: "",
+    sender_region: "",
+    sender_country: "",
 
-    receiver_name: "",
+    receiver_firstname: "",
+    receiver_lastname: "",
     receiver_phone: "",
+    receiver_company: "",
+    receiver_email: "",
+    receiver_address: "",
+    receiver_region: "",
+    receiver_country: "",
 
     package_weight: "",
     package_description: "",
+    package_length: "",
+    package_width: "",
+    package_height: "",
+    package_value: "",
 
     origin: "",
     destination: "",
@@ -94,20 +150,50 @@ export default function AddDelivery() {
  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
    e.preventDefault();
 
-   console.log("FORM SUBMITTED", form);
+   // 1. Create delivery
+   const { data, error } = await supabase
+     .from("deliveries")
+     .insert([form])
+     .select()
+     .single();
 
-   const { error } = await supabase.from("deliveries").insert([form]);
+     console.log("NEW DELIVERY:", data);
+
+     console.log("DELIVERY ID:", data.id);
 
    if (error) {
      console.log(error);
      toast.error(error.message);
-   } else {
-     toast.success("Delivery Added Successfully");
-
-     setTimeout(() => {
-       router.push("/deliveries");
-     }, 1500);
+     return;
    }
+
+   // 2. Create first tracking record
+   const { error: trackingError } = await supabase
+
+ 
+     .from("tracking_history")
+     .insert([
+       {
+         delivery_id: data.id,
+         stage: "Package Received",
+         location: form.origin,
+       },
+     ]);
+
+       console.log("TRACKING INSERT STARTED");
+       
+if (trackingError) {
+  console.log("TRACKING ERROR:", trackingError);
+  toast.error(trackingError.message);
+} else {
+  console.log("Tracking history created");
+}
+
+   toast.success("Delivery Added Successfully");
+
+   setTimeout(() => {
+     router.push("/deliveries");
+   }, 1500);
  }
 
   return (
@@ -148,17 +234,17 @@ export default function AddDelivery() {
 
                   <div>
                     <label className="block mb-2 font-semibold">
-                      Sender Name
+                      First Name
                     </label>
 
                     <input
                       type="text"
                       required
-                      value={form.sender_name}
+                      value={form.sender_firstname}
                       onChange={(e) =>
                         setForm({
                           ...form,
-                          sender_name: e.target.value,
+                          sender_firstname: e.target.value,
                         })
                       }
                       className="w-full p-4 border rounded-lg"
@@ -167,17 +253,99 @@ export default function AddDelivery() {
 
                   <div>
                     <label className="block mb-2 font-semibold">
-                      Sender Phone
+                      Last Name
                     </label>
 
                     <input
                       type="text"
+                      placeholder="Last Name"
+                      value={form.sender_lastname}
+                      onChange={(e) =>
+                        setForm({ ...form, sender_lastname: e.target.value })
+                      }
+                      className="w-full p-4 border rounded-lg"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block mb-2 font-semibold">
+                      Telelphone
+                    </label>
+
+                    <input
+                      type="text"
+                      placeholder="Telephone"
                       value={form.sender_phone}
                       onChange={(e) =>
-                        setForm({
-                          ...form,
-                          sender_phone: e.target.value,
-                        })
+                        setForm({ ...form, sender_phone: e.target.value })
+                      }
+                      className="w-full p-4 border rounded-lg"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block mb-2 font-semibold">
+                      Company Name
+                    </label>
+
+                    <input
+                      type="text"
+                      placeholder="Company Name"
+                      value={form.sender_company}
+                      onChange={(e) =>
+                        setForm({ ...form, sender_company: e.target.value })
+                      }
+                      className="w-full p-4 border rounded-lg"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block mb-2 font-semibold">Email</label>
+                    <input
+                      type="email"
+                      placeholder="Email"
+                      value={form.sender_email}
+                      onChange={(e) =>
+                        setForm({ ...form, sender_email: e.target.value })
+                      }
+                      className="w-full p-4 border rounded-lg"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block mb-2 font-semibold">Addrees</label>
+                    <input
+                      type="text"
+                      placeholder="Address"
+                      value={form.sender_address}
+                      onChange={(e) =>
+                        setForm({ ...form, sender_address: e.target.value })
+                      }
+                      className="w-full p-4 border rounded-lg"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block mb-2 font-semibold">Region</label>
+                    <input
+                      type="text"
+                      placeholder="Region"
+                      value={form.sender_region}
+                      onChange={(e) =>
+                        setForm({ ...form, sender_region: e.target.value })
+                      }
+                      className="w-full p-4 border rounded-lg"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block mb-2 font-semibold">Country</label>
+                    <input
+                      type="text"
+                      placeholder="Country"
+                      value={form.sender_country}
+                      onChange={(e) =>
+                        setForm({ ...form, sender_country: e.target.value })
                       }
                       className="w-full p-4 border rounded-lg"
                     />
@@ -193,16 +361,17 @@ export default function AddDelivery() {
 
                   <div>
                     <label className="block mb-2 font-semibold">
-                      Receiver Name
+                      First Name
                     </label>
 
                     <input
                       type="text"
-                      value={form.receiver_name}
+                      required
+                      value={form.receiver_firstname}
                       onChange={(e) =>
                         setForm({
                           ...form,
-                          receiver_name: e.target.value,
+                          receiver_firstname: e.target.value,
                         })
                       }
                       className="w-full p-4 border rounded-lg"
@@ -211,17 +380,99 @@ export default function AddDelivery() {
 
                   <div>
                     <label className="block mb-2 font-semibold">
-                      Receiver Phone
+                      Last Name
                     </label>
 
                     <input
                       type="text"
+                      placeholder="Last Name"
+                      value={form.receiver_lastname}
+                      onChange={(e) =>
+                        setForm({ ...form, receiver_lastname: e.target.value })
+                      }
+                      className="w-full p-4 border rounded-lg"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block mb-2 font-semibold">
+                      Telelphone
+                    </label>
+
+                    <input
+                      type="text"
+                      placeholder="Telephone"
                       value={form.receiver_phone}
                       onChange={(e) =>
-                        setForm({
-                          ...form,
-                          receiver_phone: e.target.value,
-                        })
+                        setForm({ ...form, receiver_phone: e.target.value })
+                      }
+                      className="w-full p-4 border rounded-lg"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block mb-2 font-semibold">
+                      Company Name
+                    </label>
+
+                    <input
+                      type="text"
+                      placeholder="Company Name"
+                      value={form.receiver_company}
+                      onChange={(e) =>
+                        setForm({ ...form, receiver_company: e.target.value })
+                      }
+                      className="w-full p-4 border rounded-lg"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block mb-2 font-semibold">Email</label>
+                    <input
+                      type="email"
+                      placeholder="Email"
+                      value={form.receiver_email}
+                      onChange={(e) =>
+                        setForm({ ...form, receiver_email: e.target.value })
+                      }
+                      className="w-full p-4 border rounded-lg"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block mb-2 font-semibold">Addrees</label>
+                    <input
+                      type="text"
+                      placeholder="Address"
+                      value={form.receiver_address}
+                      onChange={(e) =>
+                        setForm({ ...form, receiver_address: e.target.value })
+                      }
+                      className="w-full p-4 border rounded-lg"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block mb-2 font-semibold">Region</label>
+                    <input
+                      type="text"
+                      placeholder="Region"
+                      value={form.receiver_region}
+                      onChange={(e) =>
+                        setForm({ ...form, receiver_region: e.target.value })
+                      }
+                      className="w-full p-4 border rounded-lg"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block mb-2 font-semibold">Country</label>
+                    <input
+                      type="text"
+                      placeholder="Country"
+                      value={form.receiver_country}
+                      onChange={(e) =>
+                        setForm({ ...form, receiver_country: e.target.value })
                       }
                       className="w-full p-4 border rounded-lg"
                     />
@@ -241,7 +492,8 @@ export default function AddDelivery() {
                     </label>
 
                     <input
-                      type="text"
+                      type="number"
+                      placeholder="Package Weight"
                       value={form.package_weight}
                       onChange={(e) =>
                         setForm({
@@ -268,6 +520,82 @@ export default function AddDelivery() {
                       }
                       className="w-full p-4 border rounded-lg"
                       rows={4}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block mb-2 font-semibold">
+                      Package Length
+                    </label>
+
+                    <input
+                      type="text"
+                      placeholder="Length"
+                      value={form.package_length}
+                      onChange={(e) =>
+                        setForm({
+                          ...form,
+                          package_length: e.target.value,
+                        })
+                      }
+                      className="w-full p-4 border rounded-lg"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block mb-2 font-semibold">
+                      Package Width
+                    </label>
+
+                    <input
+                      type="text"
+                      placeholder="Width"
+                      value={form.package_width}
+                      onChange={(e) =>
+                        setForm({
+                          ...form,
+                          package_width: e.target.value,
+                        })
+                      }
+                      className="w-full p-4 border rounded-lg"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block mb-2 font-semibold">
+                      Package Height
+                    </label>
+
+                    <input
+                      type="text"
+                      placeholder="Height"
+                      value={form.package_height}
+                      onChange={(e) =>
+                        setForm({
+                          ...form,
+                          package_height: e.target.value,
+                        })
+                      }
+                      className="w-full p-4 border rounded-lg"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block mb-2 font-semibold">
+                      Package Value
+                    </label>
+
+                    <input
+                      type="number"
+                      placeholder="Package Value"
+                      value={form.package_value}
+                      onChange={(e) =>
+                        setForm({
+                          ...form,
+                          package_value: e.target.value,
+                        })
+                      }
+                      className="w-full p-4 border rounded-lg"
                     />
                   </div>
                 </>
@@ -307,9 +635,9 @@ export default function AddDelivery() {
                     >
                       <option value="">Select Origin</option>
 
-                      {doualaCities.map((city) => (
-                        <option key={city} value={city}>
-                          {city}
+                      {countries.map((country) => (
+                        <option key={country} value={country}>
+                          {country}
                         </option>
                       ))}
                     </select>
@@ -332,9 +660,9 @@ export default function AddDelivery() {
                     >
                       <option value="">Select Destination</option>
 
-                      {doualaCities.map((city) => (
-                        <option key={city} value={city}>
-                          {city}
+                      {countries.map((country) => (
+                        <option key={country} value={country}>
+                          {country}
                         </option>
                       ))}
                     </select>
@@ -393,8 +721,6 @@ export default function AddDelivery() {
                       className="w-full p-4 border rounded-lg"
                     />
                   </div>
-
-                
                 </>
               )}
 

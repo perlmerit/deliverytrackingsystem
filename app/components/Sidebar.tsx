@@ -68,6 +68,31 @@ export default function Sidebar() {
           Reports
         </Link>
 
+        <Link
+          href="/tracking-history"
+          className={`block p-3 rounded-lg transition-all duration-200 ${
+            pathname === "/tracking"
+              ? "bg-blue-600 text-white"
+              : "hover:bg-slate-700"
+          }`}
+        >
+          Tracking History
+        </Link>
+
+        <Link
+          href="/proof-of-delivery"
+          className="block p-3 hover:bg-blue-800 rounded"
+        >
+          Proof Of Delivery
+        </Link>
+
+        <Link href="/gps-navigation" 
+        className="p-3 hover:bg-gray-700 rounded-lg cursor-pointer">
+          
+            GPS Navigation
+          
+        </Link>
+
         <button
           onClick={handleLogout}
           className="w-full text-left p-3 rounded-lg bg-red-600 hover:bg-red-700 mt-10"
