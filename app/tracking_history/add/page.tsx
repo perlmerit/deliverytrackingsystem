@@ -44,44 +44,73 @@ export default function AddTrackingHistory() {
     setDeliveries(data || []);
   }
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
+async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  e.preventDefault();
 
-    const { error } = await supabase.from("tracking_history").insert([
-      {
-        delivery_id: Number(form.delivery_id),
-        tracking_stage: form.tracking_stage,
-        location: form.location,
-      },
-    ]);
+  const { error } = await supabase.from("tracking_history").insert([
+    {
+      delivery_id: Number(form.delivery_id),
+      tracking_stage: form.tracking_stage,
+      location: form.location,
+    },
+  ]);
 
-    if (error) {
-      toast.error(error.message);
-      return;
-    }
-
-    const { data: delivery } = await supabase
-      .from("deliveries")
-      .select("*")
-      .eq("id", Number(form.delivery_id))
-      .single();
-
-    if (delivery) {
-      await sendTrackingEmail(
-        `${delivery.receiver_firstname} ${delivery.receiver_lastname}`,
-        delivery.receiver_email,
-        delivery.tracking_number,
-        form.tracking_stage,
-        form.location,
-      );
-    }
-
-    toast.success("Tracking History Added");
-
-    setTimeout(() => {
-      router.push("/tracking-history");
-    }, 1500);
+  if (error) {
+    toast.error(error.message);
+    return;
   }
+
+    const { data: updatedData, error: updateError } = await supabase
+      .from("deliveries")
+      .update({
+        status: form.tracking_stage,
+      })
+      .eq("id", Number(form.delivery_id))
+      .select();
+
+    console.log("UPDATE RESULT:", updatedData);
+    console.log("UPDATE ERROR:", updateError);
+
+  // Get shipment information
+  const { data: delivery } = await supabase
+    .from("deliveries")
+    .select("*")
+    .eq("id", Number(form.delivery_id))
+    .single();
+
+    console.log("About to send email...");
+    console.log(delivery);
+
+    console.log("Email sent successfully");
+
+  
+
+  // Send email notification
+  if (delivery) {
+    console.log("Receiver Email:", delivery.receiver_email);
+  try {
+    const result = await sendTrackingEmail(
+      `${delivery.receiver_firstname} ${delivery.receiver_lastname}`,
+      delivery.receiver_email,
+      delivery.tracking_number,
+      form.tracking_stage,
+      form.location,
+    );
+
+    console.log("EMAIL RESULT:", result);
+  } catch (err: any) {
+    console.error("EMAIL ERROR:", err);
+
+    alert(JSON.stringify(err, null, 2));
+  }
+  }
+
+  toast.success("Tracking History Added");
+
+  setTimeout(() => {
+    router.push("/tracking-history");
+  }, 1500);
+}
 
   return (
     <Wrapper>

@@ -31,21 +31,33 @@ export default function TrackingPage() {
   const [trackingNumber, setTrackingNumber] = useState("");
   const [delivery, setDelivery] = useState<Delivery | null>(null);
 
-  async function handleSearch() {
-    const { data, error } = await supabase
-      .from("deliveries")
-      .select("*")
-      .eq("tracking_number", trackingNumber)
-      .single();
+  const [history, setHistory] = useState<any[]>([]);
+async function handleSearch() {
+  const { data, error } = await supabase
+    .from("deliveries")
+    .select("*")
+    .eq("tracking_number", trackingNumber)
+    .single();
 
-    if (error) {
-      alert("Tracking Number Not Found");
-      setDelivery(null);
-      return;
-    }
+  if (error) {
+    alert("Tracking Number Not Found");
 
-    setDelivery(data);
+    setDelivery(null);
+    setHistory([]);
+
+    return;
   }
+
+  setDelivery(data);
+
+  const { data: historyData } = await supabase
+    .from("tracking_history")
+    .select("*")
+    .eq("delivery_id", data.id)
+    .order("created_at", { ascending: false });
+
+  setHistory(historyData || []);
+}
 
   return (
     <Wrapper>
@@ -181,6 +193,31 @@ export default function TrackingPage() {
                     {delivery.status}
                   </span>
                 </p>
+              </div>
+
+              <div className="bg-white p-6 rounded-xl shadow-lg">
+                <h2 className="text-xl font-bold text-blue-700 mb-4">
+                  Tracking History
+                </h2>
+
+                {history.length === 0 ? (
+                  <p>No tracking history available.</p>
+                ) : (
+                  history.map((item) => (
+                    <div
+                      key={item.id}
+                      className="border-l-4 border-blue-700 pl-4 mb-4"
+                    >
+                      <p className="font-semibold">{item.tracking_stage}</p>
+
+                      <p>{item.location}</p>
+
+                      <p className="text-sm text-gray-500">
+                        {new Date(item.created_at).toLocaleString()}
+                      </p>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           )}

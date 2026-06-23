@@ -8,8 +8,8 @@ export async function sendTrackingEmail(
   location: string,
 ) {
   return emailjs.send(
-    "service_9c4jkhi",
-    "template_afui2tu",
+    "service_uy7zf6b",
+    "template_dof59sp",
     {
       customer_name: customerName,
       customer_email: customerEmail,
@@ -17,6 +17,6 @@ export async function sendTrackingEmail(
       tracking_stage: trackingStage,
       location: location,
     },
-    "UiGEVtRuOH7ef50_",
+    "UiGEVtRuOH7efE5o_",
   );
 }
