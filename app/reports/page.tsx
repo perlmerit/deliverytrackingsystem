@@ -2,142 +2,343 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import Sidebar from "../components/Sidebar";
-import Wrapper from "../components/Wrapper";
+import Sidebar from "@/app/components/Sidebar";
+import Wrapper from "@/app/components/Wrapper";
+import ShipmentModeChart from "@/app/components/ShipmentModeChart";
+import CarrierChart from "@/app/components/CarrierChart";
+import WarehouseChart from "@/app/components/WarehouseChart";
+import MonthlyShipmentChart from "@/app/components/MonthlyShipmentChart";
 
-interface Delivery {
-  id: string;
-  tracking_number: string;
-  customer_name: string;
-  destination: string;
-  status: string;
-}
+export default function ReportsPage() {
 
-export default function Reports() {
-  const [deliveries, setDeliveries] = useState<Delivery[]>([]);
-  const [total, setTotal] = useState(0);
-  const [delivered, setDelivered] = useState(0);
-  const [pending, setPending] = useState(0);
-  const [inTransit, setInTransit] = useState(0);
+  const [stats, setStats] = useState({
+    total: 0,
+    pending: 0,
+    inTransit: 0,
+    delivered: 0,
+    returned: 0,
+  });
 
-  useEffect(() => {
-    fetchReportData();
-  }, []);
+  const [shipmentModeData, setShipmentModeData] = useState<
+    { name: string; total: number }[]
+  >([]);
+  
+  const [carrierData, setCarrierData] = useState<
+    { name: string; total: number }[]
+  >([]);
 
-  async function fetchReportData() {
-    const { data, error } = await supabase.from("deliveries").select("*");
+  const [warehouseData, setWarehouseData] = useState<
+    { name: string; total: number }[]
+  >([]);
+
+  const [monthlyData, setMonthlyData] = useState<
+    { month: string; total: number }[]
+  >([]);
+
+  const [filter, setFilter] = useState("Today");
+
+useEffect(() => {
+  fetchReports();
+  fetchShipmentModes();
+  fetchCarrierPerformance();
+  fetchWarehousePerformance();
+  fetchMonthlyTrends();
+}, []);
+
+  async function fetchReports() {
+    const { data, error } = await supabase.from("deliveries").select("status");
 
     if (error) {
       console.log(error);
       return;
     }
 
-    setDeliveries(data || []);
+    const total = data.length;
 
-    setTotal(data.length);
+    const pending = data.filter(
+      (d) =>
+        d.status === "Package Received" || d.status === "Received at Warehouse",
+    ).length;
 
-    setDelivered(
-      data.filter((delivery) => delivery.status === "Delivered").length,
-    );
+    const inTransit = data.filter(
+      (d) =>
+        d.status === "Loaded onto Truck" ||
+        d.status === "Received by Driver" ||
+        d.status === "In Transit" ||
+        d.status === "Arrived at Branch" ||
+        d.status === "Out for Delivery",
+    ).length;
 
-    setPending(data.filter((delivery) => delivery.status === "Pending").length);
+    const delivered = data.filter((d) => d.status === "Delivered").length;
 
-    setInTransit(
-      data.filter((delivery) => delivery.status === "In Transit").length,
-    );
+    const returned = data.filter((d) => d.status === "Returned").length;
+
+    setStats({
+      total,
+      pending,
+      inTransit,
+      delivered,
+      returned,
+    });
   }
+
+  async function fetchShipmentModes() {
+    const { data, error } = await supabase
+      .from("deliveries")
+      .select("shipment_mode");
+
+    if (error) {
+      console.log(error);
+      return;
+    }
+
+    const counts: Record<string, number> = {};
+
+    data.forEach((item) => {
+      if (!counts[item.shipment_mode]) {
+        counts[item.shipment_mode] = 0;
+      }
+
+      counts[item.shipment_mode]++;
+    });
+
+    const chartData = Object.keys(counts).map((key) => ({
+      name: key,
+      total: counts[key],
+    }));
+
+    setShipmentModeData(chartData);
+  }
+
+  async function fetchCarrierPerformance() {
+    const { data, error } = await supabase.from("deliveries").select("carrier");
+
+    if (error) {
+      console.log(error);
+      return;
+    }
+
+    const counts: Record<string, number> = {};
+
+    data.forEach((item) => {
+      if (!counts[item.carrier]) {
+        counts[item.carrier] = 0;
+      }
+
+      counts[item.carrier]++;
+    });
+
+    const chartData = Object.keys(counts).map((key) => ({
+      name: key,
+      total: counts[key],
+    }));
+
+    setCarrierData(chartData);
+  }
+
+  async function fetchWarehousePerformance() {
+    const { data, error } = await supabase
+      .from("tracking_history")
+      .select("location");
+
+    if (error) {
+      console.log(error);
+      return;
+    }
+
+    const counts: Record<string, number> = {};
+
+    data.forEach((item) => {
+      if (!counts[item.location]) {
+        counts[item.location] = 0;
+      }
+
+      counts[item.location]++;
+    });
+
+    const chartData = Object.keys(counts).map((key) => ({
+      name: key,
+      total: counts[key],
+    }));
+
+    setWarehouseData(chartData);
+  }
+
+  async function fetchMonthlyTrends() {
+    const { data, error } = await supabase
+      .from("deliveries")
+      .select("created_at");
+
+    if (error) {
+      console.log(error);
+      return;
+    }
+
+    const months = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
+
+    const counts: Record<string, number> = {};
+
+    months.forEach((month) => {
+      counts[month] = 0;
+    });
+
+    data.forEach((item) => {
+      const month = months[new Date(item.created_at).getMonth()];
+      counts[month]++;
+    });
+
+    const chartData = months.map((month) => ({
+      month,
+      total: counts[month],
+    }));
+
+    setMonthlyData(chartData);
+  }
+
+  const successRate =
+    stats.total === 0 ? 0 : ((stats.delivered / stats.total) * 100).toFixed(1);
 
   return (
     <Wrapper>
       <div className="min-h-screen bg-gray-100">
         <Sidebar />
 
-        {/* Main Content */}
         <main className="ml-64 p-8">
-          <h1 className="text-4xl font-bold mb-8">Delivery Reports</h1>
+          <h1 className="text-4xl font-bold mb-8">Reports Dashboard</h1>
 
-          {/* Report Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-            <div className="bg-white p-6 rounded-xl shadow border-l-4 border-blue-600">
-              <h2 className="text-gray-500 font-medium">Total Deliveries</h2>
+          <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <h2 className="text-xl font-semibold mb-4">Date Filter</h2>
 
-              <p className="text-5xl font-bold text-blue-600 mt-2">{total}</p>
+            <div className="flex gap-4">
+              <button
+                onClick={() => setFilter("Today")}
+                className={`px-4 py-2 rounded-lg ${
+                  filter === "Today" ? "bg-blue-600 text-white" : "bg-gray-200"
+                }`}
+              >
+                Today
+              </button>
+
+              <button
+                onClick={() => setFilter("This Week")}
+                className={`px-4 py-2 rounded-lg ${
+                  filter === "This Week"
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-200"
+                }`}
+              >
+                This Week
+              </button>
+
+              <button
+                onClick={() => setFilter("This Month")}
+                className={`px-4 py-2 rounded-lg ${
+                  filter === "This Month"
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-200"
+                }`}
+              >
+                This Month
+              </button>
             </div>
 
-            <div className="bg-white p-6 rounded-xl shadow border-l-4 border-green-600">
-              <h2 className="text-gray-500 font-medium">Delivered</h2>
+            <p className="mt-4 text-gray-600">
+              Current Filter:
+              <strong> {filter}</strong>
+            </p>
+          </div>
 
-              <p className="text-5xl font-bold text-green-600 mt-2">
-                {delivered}
-              </p>
+          <div className="grid grid-cols-5 gap-6">
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <h3 className="text-gray-500">Total Shipments</h3>
+              <p className="text-4xl font-bold mt-2">{stats.total}</p>
             </div>
 
-            <div className="bg-white p-6 rounded-xl shadow border-l-4 border-red-600">
-              <h2 className="text-gray-500 font-medium">Pending</h2>
-
-              <p className="text-5xl font-bold text-red-600 mt-2">{pending}</p>
+            <div className="bg-yellow-100 rounded-xl shadow-lg p-6">
+              <h3 className="text-gray-600">Pending</h3>
+              <p className="text-4xl font-bold mt-2">{stats.pending}</p>
             </div>
 
-            <div className="bg-white p-6 rounded-xl shadow border-l-4 border-yellow-500">
-              <h2 className="text-gray-500 font-medium">In Transit</h2>
+            <div className="bg-blue-100 rounded-xl shadow-lg p-6">
+              <h3 className="text-gray-600">In Transit</h3>
+              <p className="text-4xl font-bold mt-2">{stats.inTransit}</p>
+            </div>
 
-              <p className="text-5xl font-bold text-yellow-500 mt-2">
-                {inTransit}
-              </p>
+            <div className="bg-green-100 rounded-xl shadow-lg p-6">
+              <h3 className="text-gray-600">Delivered</h3>
+              <p className="text-4xl font-bold mt-2">{stats.delivered}</p>
+            </div>
+
+            <div className="bg-red-100 rounded-xl shadow-lg p-6">
+              <h3 className="text-gray-600">Returned</h3>
+              <p className="text-4xl font-bold mt-2">{stats.returned}</p>
             </div>
           </div>
 
-          {/* Table */}
-          <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-blue-700 text-white">
-                  <tr>
-                    <th className="p-4 text-left">Tracking No</th>
+          {/* Delivery Success Rate */}
 
-                    <th className="p-4 text-left">Customer</th>
+          <div className="bg-white rounded-xl shadow-lg p-8 mt-8">
+            <h2 className="text-2xl font-bold mb-6">Delivery Success Rate</h2>
 
-                    <th className="p-4 text-left">Destination</th>
-
-                    <th className="p-4 text-left">Status</th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {deliveries.map((delivery) => (
-                    <tr key={delivery.id} className="border-b hover:bg-gray-50">
-                      <td className="p-4">{delivery.tracking_number}</td>
-
-                      <td className="p-4">{delivery.customer_name}</td>
-
-                      <td className="p-4">{delivery.destination}</td>
-
-                      <td className="p-4">
-                        <span
-                          className={`px-3 py-1 rounded-full text-white text-sm ${
-                            delivery.status === "Delivered"
-                              ? "bg-green-600"
-                              : delivery.status === "In Transit"
-                                ? "bg-yellow-500"
-                                : "bg-red-500"
-                          }`}
-                        >
-                          {delivery.status}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-
-                  {deliveries.length === 0 && (
-                    <tr>
-                      <td colSpan={4} className="text-center p-8 text-gray-500">
-                        No report data available
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
+            <div className="w-full bg-gray-200 rounded-full h-8">
+              <div
+                className="bg-green-600 h-8 rounded-full flex items-center justify-center text-white font-bold"
+                style={{ width: `${successRate}%` }}
+              >
+                {successRate}%
+              </div>
             </div>
+
+            <p className="mt-4 text-gray-600">
+              Percentage of shipments successfully delivered.
+            </p>
+          </div>
+
+          {/* Shipment Mode Chart */}
+
+          <div className="bg-white rounded-xl shadow-lg p-8 mt-8">
+            <h2 className="text-2xl font-bold mb-6">
+              Shipment Mode Distribution
+            </h2>
+
+            <ShipmentModeChart data={shipmentModeData} />
+          </div>
+
+          {/* Carrier Performance */}
+
+          <div className="bg-white rounded-xl shadow-lg p-8 mt-8">
+            <h2 className="text-2xl font-bold mb-6">Carrier Performance</h2>
+
+            <CarrierChart data={carrierData} />
+          </div>
+
+          {/* Warehouse Performance */}
+
+          <div className="bg-white rounded-xl shadow-lg p-8 mt-8">
+            <h2 className="text-2xl font-bold mb-6">Warehouse Performance</h2>
+
+            <WarehouseChart data={warehouseData} />
+          </div>
+
+          {/* Monthly Shipment Trends */}
+
+          <div className="bg-white rounded-xl shadow-lg p-8 mt-8">
+            <h2 className="text-2xl font-bold mb-6">Monthly Shipment Trends</h2>
+
+            <MonthlyShipmentChart data={monthlyData} />
           </div>
         </main>
       </div>

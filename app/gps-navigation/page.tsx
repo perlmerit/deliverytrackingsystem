@@ -70,37 +70,49 @@ export default function GPSNavigationPage() {
     );
   }
 
-  async function saveLocation() {
-    if (!selectedDelivery) {
-      toast.error("Please select a shipment first");
-      return;
-    }
-
-    if (!latitude || !longitude) {
-      toast.error("Get location first");
-      return;
-    }
-
-    const { error } = await supabase.from("driver_locations").upsert(
-      {
-  delivery_id: Number(selectedDelivery),
-  latitude,
-  longitude,
-  updated_at: new Date(),
-},
-{
-  onConflict: "delivery_id",
-}
-    );
-
-    if (error) {
-      toast.error(error.message);
-      return;
-    }
-
-    toast.success("Location Saved");
+async function saveLocation() {
+  if (!selectedDelivery) {
+    toast.error("Please select a shipment first");
+    return;
   }
 
+  if (latitude === null || longitude === null) {
+    toast.error("Get location first");
+    return;
+  }
+
+  console.log("Saving...");
+  console.log({
+    delivery_id: Number(selectedDelivery),
+    latitude,
+    longitude,
+  });
+
+  const { data, error } = await supabase
+    .from("driver_locations")
+    .upsert(
+      {
+        delivery_id: Number(selectedDelivery),
+        latitude,
+        longitude,
+        updated_at: new Date().toISOString(),
+      },
+      {
+        onConflict: "delivery_id",
+      },
+    )
+    .select();
+
+  console.log("UPSERT DATA:", data);
+  console.log("UPSERT ERROR:", error);
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  toast.success("Location Saved");
+}
   return (
     <Wrapper>
       <div className="min-h-screen bg-gray-100">

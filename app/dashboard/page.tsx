@@ -2,113 +2,144 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import Sidebar from "../components/Sidebar";
-import Wrapper from "../components/Wrapper";
+import Sidebar from "@/app/components/Sidebar";
+import Wrapper from "@/app/components/Wrapper";
 
-const Dashboard = () => {
-  const [total, setTotal] = useState(0);
-  const [delivered, setDelivered] = useState(0);
-  const [pending, setPending] = useState(0);
-  const [inTransit, setInTransit] = useState(0);
+export default function Dashboard() {
+  const [stats, setStats] = useState({
+    totalDeliveries: 0,
+    delivered: 0,
+    pending: 0,
+    inTransit: 0,
+    warehouses: 0,
+    trackingEvents: 0,
+  });
+
+  const [recentDeliveries, setRecentDeliveries] = useState<any[]>([]);
 
   useEffect(() => {
-    fetchStats();
+    fetchDashboardData();
   }, []);
 
-  async function fetchStats() {
-    const { data, error } = await supabase
-      .from("deliveries")
+  async function fetchDashboardData() {
+    const { data: deliveries } = await supabase.from("deliveries").select("*");
+
+    const { data: warehouses } = await supabase.from("warehouses").select("*");
+
+    const { data: trackingHistory } = await supabase
+      .from("tracking_history")
       .select("*");
 
-    if (error) {
-      console.log(error);
-      return;
-    }
+      const { data: recent } = await supabase
+        .from("deliveries")
+        .select("*")
+        .order("id", { ascending: false })
+        .limit(5);
 
-    setTotal(data.length);
+    setStats({
+      totalDeliveries: deliveries?.length || 0,
 
-    setDelivered(
-      data.filter(
-        (delivery) => delivery.status === "Delivered"
-      ).length
-    );
+      delivered:
+        deliveries?.filter((item) => item.status === "Delivered").length || 0,
 
-    setPending(
-      data.filter(
-        (delivery) => delivery.status === "Pending"
-      ).length
-    );
+      pending:
+        deliveries?.filter((item) => item.status === "Pending").length || 0,
 
-    setInTransit(
-      data.filter(
-        (delivery) => delivery.status === "In Transit"
-      ).length
-    );
+      inTransit:
+        deliveries?.filter((item) => item.status === "In Transit").length || 0,
+
+      warehouses: warehouses?.length || 0,
+
+      trackingEvents: trackingHistory?.length || 0,
+    });
+
+    setRecentDeliveries(recent || []);
   }
 
   return (
     <Wrapper>
-      <div className="flex min-h-screen bg-gray-100">
+      <div className="min-h-screen bg-gray-100">
         <Sidebar />
 
-        {/* Content Area */}
-        <main className="flex-1 ml-64 p-8">
-          <h1 className="text-4xl font-bold mb-8">
-            Dashboard
-          </h1>
+        <main className="ml-64 p-8">
+          <h1 className="text-4xl font-bold mb-8">Dashboard</h1>
 
-          {/* Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <Card
+              title="Total Deliveries"
+              value={stats.totalDeliveries}
+              color="blue"
+            />
 
-            {/* Total Deliveries */}
-            <div className="bg-white rounded-2xl shadow-lg border-l-4 border-blue-500 p-10 h-[250px] flex flex-col justify-center">
-              <h2 className="text-2xl text-gray-600 font-medium">
-                Total Deliveries
-              </h2>
+            <Card title="Delivered" value={stats.delivered} color="green" />
 
-              <p className="text-7xl font-bold text-blue-600 mt-4">
-                {total}
-              </p>
-            </div>
+            <Card title="Pending" value={stats.pending} color="red" />
 
-            {/* Delivered */}
-            <div className="bg-white rounded-2xl shadow-lg border-l-4 border-green-500 p-10 h-[250px] flex flex-col justify-center">
-              <h2 className="text-2xl text-gray-600 font-medium">
-                Delivered
-              </h2>
+            <Card title="In Transit" value={stats.inTransit} color="yellow" />
 
-              <p className="text-7xl font-bold text-green-600 mt-4">
-                {delivered}
-              </p>
-            </div>
+            <Card title="Warehouses" value={stats.warehouses} color="purple" />
 
-            {/* Pending */}
-            <div className="bg-white rounded-2xl shadow-lg border-l-4 border-red-500 p-10 h-[250px] flex flex-col justify-center">
-              <h2 className="text-2xl text-gray-600 font-medium">
-                Pending
-              </h2>
+            <Card
+              title="Tracking Events"
+              value={stats.trackingEvents}
+              color="indigo"
+            />
+          </div>
 
-              <p className="text-7xl font-bold text-red-600 mt-4">
-                {pending}
-              </p>
-            </div>
+          <div className="mt-10 bg-white rounded-2xl shadow-lg p-6">
+            <h2 className="text-2xl font-bold mb-4">Recent Shipments</h2>
 
-            {/* In Transit */}
-            <div className="bg-white rounded-2xl shadow-lg border-l-4 border-yellow-500 p-10 h-[250px] flex flex-col justify-center">
-              <h2 className="text-2xl text-gray-600 font-medium">
-                In Transit
-              </h2>
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="bg-gray-100">
+                  <th className="p-3 text-left">Tracking</th>
+                  <th className="p-3 text-left">Sender</th>
+                  <th className="p-3 text-left">Receiver</th>
+                  <th className="p-3 text-left">Status</th>
+                </tr>
+              </thead>
 
-              <p className="text-7xl font-bold text-yellow-500 mt-4">
-                {inTransit}
-              </p>
-            </div>
+              <tbody>
+                {recentDeliveries.map((delivery) => (
+                  <tr key={delivery.id} className="border-b">
+                    <td className="p-3">{delivery.tracking_number}</td>
 
+                    <td className="p-3">
+                      {delivery.sender_firstname} {delivery.sender_lastname}
+                    </td>
+
+                    <td className="p-3">
+                      {delivery.receiver_firstname} {delivery.receiver_lastname}
+                    </td>
+
+                    <td className="p-3">{delivery.status}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </main>
       </div>
     </Wrapper>
   );
-};
+}
 
-export default Dashboard;
+function Card({
+  title,
+  value,
+  color,
+}: {
+  title: string;
+  value: number;
+  color: string;
+}) {
+  return (
+    <div
+      className={`bg-white border-l-4 border-${color}-500 rounded-xl shadow-lg p-6`}
+    >
+      <h2 className="text-lg text-gray-600">{title}</h2>
+
+      <p className={`text-5xl font-bold text-${color}-600 mt-4`}>{value}</p>
+    </div>
+  );
+}

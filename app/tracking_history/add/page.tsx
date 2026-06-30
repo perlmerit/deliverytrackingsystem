@@ -7,6 +7,7 @@ import Sidebar from "@/app/components/Sidebar";
 import Wrapper from "@/app/components/Wrapper";
 import toast, { Toaster } from "react-hot-toast";
 import { sendTrackingEmail } from "@/lib/email";
+import { countryCoordinates } from "@/lib/countryCoordinates";
 
 interface Delivery {
   id: number;
@@ -20,6 +21,10 @@ export default function AddTrackingHistory() {
 
   const [deliveries, setDeliveries] = useState<Delivery[]>([]);
 
+  const [warehouses, setWarehouses] = useState<any[]>([]);
+
+  const [selectedWarehouseId, setSelectedWarehouseId] = useState("");
+
   const [form, setForm] = useState({
     delivery_id: "",
     tracking_stage: "",
@@ -28,9 +33,12 @@ export default function AddTrackingHistory() {
 
   useEffect(() => {
     fetchDeliveries();
+     fetchWarehouses();
   }, []);
 
-  async function fetchDeliveries() {
+  async function fetchDeliveries()
+
+  {
     const { data, error } = await supabase
       .from("deliveries")
       .select("id, tracking_number")
@@ -44,8 +52,27 @@ export default function AddTrackingHistory() {
     setDeliveries(data || []);
   }
 
+    async function fetchWarehouses() {
+      const { data, error } = await supabase
+        .from("warehouses")
+        .select("*")
+        .order("warehouse_name");
+
+      if (error) {
+        console.log(error);
+        return;
+      }
+
+      setWarehouses(data || []);
+    }
+
+
+
 async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
   e.preventDefault();
+  
+  console.log("FORM DATA:", form);
+  console.log("SELECTED WAREHOUSE:", selectedWarehouseId);
 
   const { error } = await supabase.from("tracking_history").insert([
     {
@@ -55,10 +82,54 @@ async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     },
   ]);
 
-  if (error) {
-    toast.error(error.message);
-    return;
+console.log("TRACKING STAGE =", form.tracking_stage);
+
+if (
+  form.tracking_stage === "Received at Warehouse" ||
+  form.tracking_stage === "Arrived at Branch"
+) {
+  const { data: movementData, error: movementError } = await supabase
+    .from("warehouse_movements")
+    .insert([
+      {
+        delivery_id: Number(form.delivery_id),
+        warehouse_id: Number(selectedWarehouseId),
+        movement_type: "Received",
+        notes: form.location,
+      },
+    ])
+    .select();
+
+  console.log("MOVEMENT DATA:", movementData);
+  console.log("MOVEMENT ERROR:", movementError);
+
+  if (movementError) {
+    alert(movementError.message);
   }
+}
+
+alert("TRACKING STAGE = " + form.tracking_stage);
+
+if (form.tracking_stage === "Loaded onto Truck") {
+  const { data: movementData, error: movementError } = await supabase
+    .from("warehouse_movements")
+    .insert([
+      {
+        delivery_id: Number(form.delivery_id),
+        warehouse_id: Number(selectedWarehouseId),
+        movement_type: "Dispatched",
+        notes: form.location,
+      },
+    ])
+    .select();
+
+  console.log("MOVEMENT DATA:", movementData);
+  console.log("MOVEMENT ERROR:", movementError);
+
+  if (movementError) {
+    alert(movementError.message);
+  }
+}
 
     const { data: updatedData, error: updateError } = await supabase
       .from("deliveries")
@@ -78,6 +149,35 @@ async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     .eq("id", Number(form.delivery_id))
     .single();
 
+    const warehouse = warehouses.find(
+      (w) => w.id === Number(selectedWarehouseId),
+    );
+if (warehouse) {
+  console.log("Warehouse Selected:", warehouse);
+
+  const coords = countryCoordinates[warehouse.country];
+
+  console.log("Coordinates Found:", coords);
+
+  if (coords) {
+    const { data, error: locationError } = await supabase
+      .from("driver_locations")
+      .upsert(
+        {
+          delivery_id: Number(form.delivery_id),
+          latitude: coords.lat,
+          longitude: coords.lng,
+        },
+        {
+          onConflict: "delivery_id",
+        },
+      )
+      .select();
+
+    console.log("Driver Location Updated:", data);
+    console.log("Driver Location Error:", locationError);
+  }
+}
     console.log("About to send email...");
     console.log(delivery);
 
@@ -185,21 +285,33 @@ async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
               </div>
 
               <div>
-                <label className="block mb-2 font-semibold">Location</label>
+                <label className="block mb-2 font-semibold">Warehouse</label>
 
-                <input
-                  type="text"
-                  value={form.location}
-                  onChange={(e) =>
+                <select
+                  value={selectedWarehouseId}
+                  onChange={(e) => {
+                    setSelectedWarehouseId(e.target.value);
+
+                    const warehouse = warehouses.find(
+                      (w) => w.id === Number(e.target.value),
+                    );
+
                     setForm({
                       ...form,
-                      location: e.target.value,
-                    })
-                  }
+                      location: warehouse?.warehouse_name || "",
+                    });
+                  }}
                   className="w-full p-4 border rounded-lg"
-                  placeholder="Example: Douala Warehouse"
                   required
-                />
+                >
+                  <option value="">Select Warehouse</option>
+
+                  {warehouses.map((warehouse) => (
+                    <option key={warehouse.id} value={warehouse.id}>
+                      {warehouse.warehouse_name}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <button

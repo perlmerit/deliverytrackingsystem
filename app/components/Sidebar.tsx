@@ -20,13 +20,13 @@ export default function Sidebar() {
   }
 
   return (
-    <div className="w-64 h-screen fixed left-0 top-0 bg-slate-900 text-white p-6">
+    <div className="w-72 h-screen fixed left-0 top-0 bg-slate-900 text-white p-6 overflow-y-auto">
       <h1 className="text-2xl font-bold mb-10">Logistics Tracker</h1>
 
-      <nav className="space-y-3">
+      <nav className="flex flex-col gap-2 mt-6">
         <Link
           href="/dashboard"
-          className={`block p-3 rounded-lg transition-all duration-200 ${
+          className={`w-full p-3 rounded-lg transition ${
             pathname === "/dashboard"
               ? "bg-blue-600 text-white"
               : "hover:bg-slate-700"
@@ -37,7 +37,7 @@ export default function Sidebar() {
 
         <Link
           href="/deliveries"
-          className={`block p-3 rounded-lg transition-all duration-200 ${
+          className={`w-full p-3 rounded-lg transition ${
             pathname.startsWith("/deliveries")
               ? "bg-blue-600 text-white"
               : "hover:bg-slate-700"
@@ -48,7 +48,7 @@ export default function Sidebar() {
 
         <Link
           href="/tracking"
-          className={`block p-3 rounded-lg transition-all duration-200 ${
+          className={`w-full p-3 rounded-lg transition ${
             pathname === "/tracking"
               ? "bg-blue-600 text-white"
               : "hover:bg-slate-700"
@@ -58,20 +58,9 @@ export default function Sidebar() {
         </Link>
 
         <Link
-          href="/reports"
-          className={`block p-3 rounded-lg transition-all duration-200 ${
-            pathname === "/reports"
-              ? "bg-blue-600 text-white"
-              : "hover:bg-slate-700"
-          }`}
-        >
-          Reports
-        </Link>
-
-        <Link
           href="/tracking-history"
-          className={`block p-3 rounded-lg transition-all duration-200 ${
-            pathname === "/tracking"
+          className={`w-full p-3 rounded-lg transition ${
+            pathname === "/tracking-history"
               ? "bg-blue-600 text-white"
               : "hover:bg-slate-700"
           }`}
@@ -81,21 +70,42 @@ export default function Sidebar() {
 
         <Link
           href="/proof-of-delivery"
-          className="block p-3 hover:bg-blue-800 rounded"
+          className={`w-full p-3 rounded-lg transition ${
+            pathname === "/proof-of-delivery"
+              ? "bg-blue-600 text-white"
+              : "hover:bg-slate-700"
+          }`}
         >
           Proof Of Delivery
         </Link>
 
-        <Link href="/gps-navigation" 
-        className="p-3 hover:bg-gray-700 rounded-lg cursor-pointer">
-          
-            GPS Navigation
-          
+       
+
+        <Link
+          href="/warehouse-movements"
+          className={`w-full p-3 rounded-lg transition ${
+            pathname === "/warehouse-movements"
+              ? "bg-blue-600 text-white"
+              : "hover:bg-slate-700"
+          }`}
+        >
+          Warehouse Movements
+        </Link>
+
+        <Link
+          href="/reports"
+          className={`w-full p-3 rounded-lg transition ${
+            pathname === "/reports"
+              ? "bg-blue-600 text-white"
+              : "hover:bg-slate-700"
+          }`}
+        >
+          Reports
         </Link>
 
         <button
           onClick={handleLogout}
-          className="w-full text-left p-3 rounded-lg bg-red-600 hover:bg-red-700 mt-10"
+          className="w-full text-left p-3 rounded-lg bg-red-600 hover:bg-red-700 mt-4"
         >
           Logout
         </button>

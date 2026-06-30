@@ -11,6 +11,10 @@ import Wrapper from "../components/Wrapper";
 interface Delivery {
   id?: string;
   tracking_number: string;
+  type_of_shipment: string;
+  shipment_mode: string;
+  carrier: string;
+  carrier_number: string;
 
   sender_firstname: string;
   sender_lastname: string;
@@ -18,18 +22,17 @@ interface Delivery {
   sender_company: string;
   sender_email: string;
   sender_address: string;
-  sender_region: string;
-  sender_country: string;
+
 
   receiver_firstname: string;
   receiver_lastname: string;
-  receiver_company: string;
   receiver_phone: string;
+  receiver_company: string;
   receiver_email: string;
   receiver_address: string;
-  receiver_region: string;
-  receiver_country: string;
 
+
+  product: string;
   package_weight: string;
   package_description: string;
   package_length: string;
@@ -37,10 +40,12 @@ interface Delivery {
   package_height: string;
   package_value: string;
 
+  reference_number: string;
+  total_freight: string;
+
   origin: string;
   destination: string;
 
-  bus_number: string;
   departure_time: string;
   expected_arrival: string;
 
@@ -113,37 +118,47 @@ const Delivery = () => {
                     <tr>
                       <th className="p-4 text-left">Tracking No</th>
 
+                      <th className="p-4 text-left">Shipment Type</th>
+
+                      <th className="p-4 text-left">Shipment Mode</th>
+
+                      <th className="p-4 text-left">Carrier</th>
+
+                      <th className="p-4 text-left">Carrier Number</th>
+
                       <th className="p-4 text-left">Sender First Name</th>
 
                       <th className="p-4 text-left">SenderLast Name</th>
 
-                      <th className="p-4 text-left">Sender Company</th>
+                      <th className="p-4 text-left">Sender_phone</th>
 
-                      <th className="p-4 text-left">Sender Phone</th>
+                      <th className="p-4 text-left">Sender Company</th>
 
                       <th className="p-4 text-left">Sender Email</th>
 
                       <th className="p-4 text-left">Sender Address</th>
 
-                      <th className="p-4 text-left">Sender Region</th>
-
-                      <th className="p-4 text-left">Sender Country</th>
+                     
 
                       <th className="p-4 text-left">Receiver First Name</th>
 
                       <th className="p-4 text-left">Receiver Last Name</th>
 
-                      <th className="p-4 text-left">Receiver Company</th>
-
                       <th className="p-4 text-left">Receiver Phone</th>
+
+                      <th className="p-4 text-left">Receiver Company</th>
 
                       <th className="p-4 text-left">Receiver Email</th>
 
                       <th className="p-4 text-left">Receiver Address</th>
 
-                      <th className="p-4 text-left">Receiver Region</th>
+                     
 
-                      <th className="p-4 text-left">Receiver Country</th>
+                      <th className="p-4 text-left">Product</th>
+
+                      <th className="p-4 text-left">Package Weight</th>
+
+                      <th className="p-4 text-left">Package Description</th>
 
                       <th className="p-4 text-left">Package Length</th>
 
@@ -153,15 +168,13 @@ const Delivery = () => {
 
                       <th className="p-4 text-left">Package Value</th>
 
-                      <th className="p-4 text-left">Package Weight</th>
+                      <th className="p-4 text-left">Reference Number</th>
 
-                      <th className="p-4 text-left">Package Description</th>
+                      <th className="p-4 text-left">Total Freight</th>
 
                       <th className="p-4 text-left">Origin</th>
 
                       <th className="p-4 text-left">Destination</th>
-
-                      <th className="p-4 text-left">Bus Number</th>
 
                       <th className="p-4 text-left">Departure Time</th>
 
@@ -184,10 +197,28 @@ const Delivery = () => {
                           {delivery.tracking_number}
                         </td>
 
-                        {/* Sender */}
+                        <td className="p-4  whitespace-nowrap">
+                          {delivery.type_of_shipment}
+                        </td>
+
+                        <td className="p-4  whitespace-nowrap">
+                          {delivery.shipment_mode}
+                        </td>
+
+                        <td className="p-4  whitespace-nowrap">
+                          {delivery.carrier}
+                        </td>
+
+                        <td className="p-4  whitespace-nowrap">
+                          {delivery.carrier_number}
+                        </td>
+
                         <td className="p-4  whitespace-nowrap">
                           {delivery.sender_firstname}
                         </td>
+
+                        {/* Sender */}
+
                         <td className="p-4  whitespace-nowrap">
                           {delivery.sender_lastname}
                         </td>
@@ -203,12 +234,8 @@ const Delivery = () => {
                         <td className="p-4  whitespace-nowrap">
                           {delivery.sender_address}
                         </td>
-                        <td className="p-4  whitespace-nowrap">
-                          {delivery.sender_region}
-                        </td>
-                        <td className=" p-4 whitespace-nowrap">
-                          {delivery.sender_country}
-                        </td>
+
+                        
 
                         {/* Receiver */}
                         <td className="p-4  whitespace-nowrap">
@@ -229,14 +256,13 @@ const Delivery = () => {
                         <td className="p-4  whitespace-nowrap">
                           {delivery.receiver_address}
                         </td>
-                        <td className="p-4  whitespace-nowrap">
-                          {delivery.receiver_region}
-                        </td>
-                        <td className="p-4  whitespace-nowrap">
-                          {delivery.receiver_country}
-                        </td>
+
+                        
 
                         {/* Package */}
+                        <td className="p-4  whitespace-nowrap">
+                          {delivery.product}
+                        </td>
                         <td className="p-4  whitespace-nowrap">
                           {delivery.package_weight}
                         </td>
@@ -257,14 +283,18 @@ const Delivery = () => {
                         </td>
 
                         {/* Delivery */}
+
+                        <td className="p-4  whitespace-nowrap">
+                          {delivery.reference_number}
+                        </td>
+                        <td className="p-4  whitespace-nowrap">
+                          {delivery.total_freight}
+                        </td>
                         <td className="p-4  whitespace-nowrap">
                           {delivery.origin}
                         </td>
                         <td className="p-4  whitespace-nowrap">
                           {delivery.destination}
-                        </td>
-                        <td className="p-4  whitespace-nowrap">
-                          {delivery.bus_number}
                         </td>
 
                         <td className="p-4  whitespace-nowrap">

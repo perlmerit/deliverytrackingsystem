@@ -6,9 +6,14 @@ import { useRouter } from "next/navigation";
 import Sidebar from "@/app/components/Sidebar";
 import Wrapper from "@/app/components/Wrapper";
 import toast, { Toaster } from "react-hot-toast";
+import { countryCoordinates } from "@/lib/countryCoordinates";
 
 interface Delivery {
   tracking_number: string;
+  type_of_shipment: string;
+  shipment_mode: string;
+  carrier: string;
+  carrier_number: string;
 
   sender_firstname: string;
   sender_lastname: string;
@@ -16,18 +21,18 @@ interface Delivery {
   sender_company: string;
   sender_email: string;
   sender_address: string;
-  sender_region: string;
-  sender_country: string;
 
   receiver_firstname: string;
   receiver_lastname: string;
-  receiver_company: string;
   receiver_phone: string;
+  receiver_company: string;
   receiver_email: string;
   receiver_address: string;
-  receiver_region: string;
-  receiver_country: string;
 
+
+
+  product: string;
+  package_type: string;
   package_weight: string;
   package_description: string;
   package_length: string;
@@ -35,10 +40,12 @@ interface Delivery {
   package_height: string;
   package_value: string;
 
+  reference_number: string;
+  total_freight: string;
+
   origin: string;
   destination: string;
 
-  bus_number: string;
   departure_time: string;
   expected_arrival: string;
 
@@ -100,6 +107,10 @@ export default function AddDelivery() {
 
   const [form, setForm] = useState<Delivery>({
     tracking_number: "",
+    type_of_shipment: "",
+    shipment_mode: "",
+    carrier: "",
+    carrier_number: "",
 
     sender_firstname: "",
     sender_lastname: "",
@@ -107,8 +118,7 @@ export default function AddDelivery() {
     sender_company: "",
     sender_email: "",
     sender_address: "",
-    sender_region: "",
-    sender_country: "",
+
 
     receiver_firstname: "",
     receiver_lastname: "",
@@ -116,9 +126,10 @@ export default function AddDelivery() {
     receiver_company: "",
     receiver_email: "",
     receiver_address: "",
-    receiver_region: "",
-    receiver_country: "",
+    
 
+    product: "",
+    package_type: "",
     package_weight: "",
     package_description: "",
     package_length: "",
@@ -126,10 +137,12 @@ export default function AddDelivery() {
     package_height: "",
     package_value: "",
 
+    reference_number: "",
+    total_freight: "",
+
     origin: "",
     destination: "",
 
-    bus_number: "",
     departure_time: "",
     expected_arrival: "",
 
@@ -157,14 +170,37 @@ export default function AddDelivery() {
      .select()
      .single();
 
-     console.log("NEW DELIVERY:", data);
-
-     console.log("DELIVERY ID:", data.id);
-
    if (error) {
-     console.log(error);
+     console.log("INSERT ERROR:", error);
+     console.log("MESSAGE:", error.message);
+     console.log("DETAILS:", error.details);
+     console.log("HINT:", error.hint);
+
      toast.error(error.message);
      return;
+   }
+
+   console.log("NEW DELIVERY:", data);
+   console.log("DELIVERY ID:", data.id);
+
+   const coords = countryCoordinates[form.origin];
+
+   if (coords) {
+     const { error: gpsError } = await supabase
+       .from("driver_locations")
+       .insert([
+         {
+           delivery_id: data.id,
+           latitude: coords.lat,
+           longitude: coords.lng,
+         },
+       ]);
+
+     if (gpsError) {
+       console.log("GPS INSERT ERROR:", gpsError);
+     } else {
+       console.log("Initial GPS location saved.");
+     }
    }
 
    // 2. Create first tracking record
@@ -234,7 +270,7 @@ if (trackingError) {
 
                   <div>
                     <label className="block mb-2 font-semibold">
-                      First Name
+                      SenderFirst Name
                     </label>
 
                     <input
@@ -325,31 +361,7 @@ if (trackingError) {
                     />
                   </div>
 
-                  <div>
-                    <label className="block mb-2 font-semibold">Region</label>
-                    <input
-                      type="text"
-                      placeholder="Region"
-                      value={form.sender_region}
-                      onChange={(e) =>
-                        setForm({ ...form, sender_region: e.target.value })
-                      }
-                      className="w-full p-4 border rounded-lg"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block mb-2 font-semibold">Country</label>
-                    <input
-                      type="text"
-                      placeholder="Country"
-                      value={form.sender_country}
-                      onChange={(e) =>
-                        setForm({ ...form, sender_country: e.target.value })
-                      }
-                      className="w-full p-4 border rounded-lg"
-                    />
-                  </div>
+                  
                 </>
               )}
 
@@ -452,31 +464,7 @@ if (trackingError) {
                     />
                   </div>
 
-                  <div>
-                    <label className="block mb-2 font-semibold">Region</label>
-                    <input
-                      type="text"
-                      placeholder="Region"
-                      value={form.receiver_region}
-                      onChange={(e) =>
-                        setForm({ ...form, receiver_region: e.target.value })
-                      }
-                      className="w-full p-4 border rounded-lg"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block mb-2 font-semibold">Country</label>
-                    <input
-                      type="text"
-                      placeholder="Country"
-                      value={form.receiver_country}
-                      onChange={(e) =>
-                        setForm({ ...form, receiver_country: e.target.value })
-                      }
-                      className="w-full p-4 border rounded-lg"
-                    />
-                  </div>
+                  
                 </>
               )}
 
@@ -485,6 +473,86 @@ if (trackingError) {
               {step === 3 && (
                 <>
                   <h2 className="text-2xl font-bold">Package Information</h2>
+
+                  <div>
+                    <label className="block mb-2 font-semibold">
+                      Type of Shipment
+                    </label>
+
+                    <select
+                      value={form.type_of_shipment}
+                      onChange={(e) =>
+                        setForm({
+                          ...form,
+                          type_of_shipment: e.target.value,
+                        })
+                      }
+                      className="w-full p-4 border rounded-lg"
+                      required
+                    >
+                      <option value="">Select Shipment Type</option>
+
+                      <option value="Document">Document</option>
+                      <option value="Parcel">Parcel</option>
+                      <option value="Electronics">Electronics</option>
+                      <option value="Furniture">Furniture</option>
+                      <option value="Fragile Goods">Fragile Goods</option>
+                      <option value="Medical Supplies">Medical Supplies</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block mb-2 font-semibold">Product</label>
+
+                    <input
+                      type="text"
+                      value={form.product}
+                      onChange={(e) =>
+                        setForm({
+                          ...form,
+                          product: e.target.value,
+                        })
+                      }
+                      className="w-full p-4 border rounded-lg"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block mb-2 font-semibold">
+                      Package Type
+                    </label>
+
+                    <select
+                      value={form.package_type}
+                      onChange={(e) =>
+                        setForm({
+                          ...form,
+                          package_type: e.target.value,
+                        })
+                      }
+                      className="w-full p-4 border rounded-lg"
+                      required
+                    >
+                      <option value="">Select Package Type</option>
+
+                      <option value="1 Box">1 Box</option>
+                      <option value="2 Boxes">2 Boxes</option>
+
+                      <option value="1 Carton">1 Carton</option>
+                      <option value="2 Cartons">2 Cartons</option>
+
+                      <option value="1 Package">1 Package</option>
+                      <option value="5 Packages">5 Packages</option>
+
+                      <option value="1 Pallet">1 Pallet</option>
+                      <option value="2 Pallets">2 Pallets</option>
+
+                      <option value="1 Crate">1 Crate</option>
+                      <option value="2 Crates">2 Crates</option>
+
+                      <option value="1 Container">1 Container</option>
+                    </select>
+                  </div>
 
                   <div>
                     <label className="block mb-2 font-semibold">
@@ -621,6 +689,115 @@ if (trackingError) {
                   </div>
 
                   <div>
+                    <label className="block mb-2 font-semibold">
+                      Reference Number
+                    </label>
+
+                    <input
+                      type="text"
+                      value={form.reference_number}
+                      onChange={(e) =>
+                        setForm({
+                          ...form,
+                          reference_number: e.target.value,
+                        })
+                      }
+                      className="w-full p-4 border rounded-lg"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block mb-2 font-semibold">
+                      Total Freight
+                    </label>
+
+                    <input
+                      type="number"
+                      value={form.total_freight}
+                      onChange={(e) =>
+                        setForm({
+                          ...form,
+                          total_freight: e.target.value,
+                        })
+                      }
+                      className="w-full p-4 border rounded-lg"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block mb-2 font-semibold">
+                      Shipment Mode
+                    </label>
+
+                    <select
+                      value={form.shipment_mode}
+                      onChange={(e) =>
+                        setForm({
+                          ...form,
+                          shipment_mode: e.target.value,
+                        })
+                      }
+                      className="w-full p-4 border rounded-lg"
+                      required
+                    >
+                      <option value="">Select Shipment Mode</option>
+
+                      <option value="Road Freight">Road Freight</option>
+
+                      <option value="Air Freight">Air Freight</option>
+
+                      <option value="Sea Freight">Sea Freight</option>
+
+                      <option value="Rail Freight">Rail Freight</option>
+
+                      <option value="Express Delivery">Express Delivery</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block mb-2 font-semibold">Carrier</label>
+
+                    <select
+                      value={form.carrier}
+                      onChange={(e) =>
+                        setForm({
+                          ...form,
+                          carrier: e.target.value,
+                        })
+                      }
+                      className="w-full p-4 border rounded-lg"
+                      required
+                    >
+                      <option value="">Select Carrier</option>
+
+                      <option value="DHL">DHL</option>
+                      <option value="FedEx">FedEx</option>
+                      <option value="UPS">UPS</option>
+                      <option value="EMS">EMS</option>
+                      <option value="CMA CGM">CMA CGM</option>
+                      <option value="Maersk">Maersk</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block mb-2 font-semibold">
+                      Carrier Number
+                    </label>
+
+                    <input
+                      type="text"
+                      value={form.carrier_number}
+                      onChange={(e) =>
+                        setForm({
+                          ...form,
+                          carrier_number: e.target.value,
+                        })
+                      }
+                      className="w-full p-4 border rounded-lg"
+                    />
+                  </div>
+
+                  <div>
                     <label className="block mb-2 font-semibold">Origin</label>
 
                     <select
@@ -666,24 +843,6 @@ if (trackingError) {
                         </option>
                       ))}
                     </select>
-                  </div>
-
-                  <div>
-                    <label className="block mb-2 font-semibold">
-                      Bus Number
-                    </label>
-
-                    <input
-                      type="text"
-                      value={form.bus_number}
-                      onChange={(e) =>
-                        setForm({
-                          ...form,
-                          bus_number: e.target.value,
-                        })
-                      }
-                      className="w-full p-4 border rounded-lg"
-                    />
                   </div>
 
                   <div>

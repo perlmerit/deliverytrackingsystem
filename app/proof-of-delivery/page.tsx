@@ -104,9 +104,9 @@ export default function ProofOfDeliveryPage() {
 
                   <th className="p-4 text-left">Delivered At</th>
 
-                  <th className="p-4 text-left">Actions</th>
-
                   <th className="p-4">Location</th>
+
+                  <th className="p-4 text-left">Actions</th>
                 </tr>
               </thead>
 
